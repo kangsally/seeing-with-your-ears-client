@@ -1,18 +1,19 @@
 import React, { Component } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import MainButtons from '../components/MainButtons';
-import * as Speech from 'expo-speech';
+import {startTospeak, stopToSpeak} from '../utils/utils.js';
 
 export default class TutorialScreen extends Component {
 
   componentDidMount = () => {
     const greetText =
       '메인화면입니다. 나의 위치를 들으시려면 왼쪽버튼, 나의 시야를 들으시려면 오른쪽버튼을 눌러주세요.';
-    this.speak(greetText);
+      startTospeak(greetText);
   };
 
   navigateBtn = navigate => {
     const { navigation } = this.props;
+    stopToSpeak();
     if(navigate === 'right'){
         navigation.navigate('CameraScreen');
     }else if(navigate === 'left'){
@@ -20,12 +21,7 @@ export default class TutorialScreen extends Component {
     }
   }
 
-  speak = thingToSay => {
-    Speech.speak(thingToSay);
-  };
-
   render() {
-
       return (
         <View style={styles.container}>
           <View style={styles.content}>

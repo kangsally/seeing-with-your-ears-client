@@ -2,7 +2,17 @@ import React, { Component } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import MainButtons from '../components/MainButtons';
 import HomeButton from '../components/HomeButton';
-import * as Speech from 'expo-speech';
+import { startTospeak, stopToSpeak } from '../utils/utils.js';
+import {
+  intro,
+  pressLeft,
+  pressRight,
+  pressCenter,
+  error,
+  end,
+  excellent,
+  blank
+} from '../assets/audioScripts/tutorialScript';
 
 export default class TutorialScreen extends Component {
   constructor(props) {
@@ -16,38 +26,34 @@ export default class TutorialScreen extends Component {
   }
 
   componentDidMount = () => {
-    const greetText =
-      '귀로 튜토리얼입니다. 스크린 하단 3분의 1지점에 왼쪽과 오른쪽 두개 버튼이 있습니다. 왼쪽버튼을 눌러주세요';
-    this.speak(greetText);
+    startTospeak(intro + blank + pressLeft);
   };
 
   checkBtn = button => {
+    stopToSpeak();
     if (button === 'right') {
       if (!this.state.isLeftCheck && !this.state.isRightCheck) {
-        this.speak('잘못누르셨습니다. 왼쪽버튼을 눌러주세요.');
+        startTospeak(error + blank + pressLeft);
       } else {
         this.setState({ isRightCheck: true });
-        this.speak(
-          '잘하셨습니다. 이번에는 스크린 하단 3분의 1 지점에 중앙버튼이 하나 있습니다. 버튼을 눌러주세요'
-        );
+        startTospeak(excellent + blank + pressCenter);
       }
     } else if (button === 'left') {
       if (this.state.isLeftCheck && !this.state.isRightCheck) {
-        this.speak('잘못누르셨습니다. 오른쪽버튼을 눌러주세요.');
+        startTospeak(error + blank + pressRight);
       } else {
         this.setState({ isLeftCheck: true });
-        this.speak('잘하셨습니다. 이번에는 오른쪽 버튼을 눌러주세요');
+        startTospeak(excellent + blank + pressRight);
       }
     } else if (button === 'center') {
       this.setState({ isCenterCheck: true });
-      this.speak(
-        '잘하셨습니다. 다시 튜토리얼을 진행하시려면 왼쪽 버튼을 귀로를 시작하시려면 오른쪽 버튼을 눌러주세요'
-      );
+      startTospeak(excellent + blank + end);
     }
   };
 
   navigateBtn = navigate => {
     const { navigation } = this.props;
+    stopToSpeak();
     if (navigate === 'right') {
       navigation.navigate('MainScreen');
     } else if (navigate === 'left') {
@@ -56,9 +62,7 @@ export default class TutorialScreen extends Component {
         isLeftCheck: false,
         isCenterCheck: false
       });
-      const greetText =
-      '귀로 튜토리얼입니다. 스크린 하단 3분의 1지점에 왼쪽과 오른쪽 두개 버튼이 있습니다. 왼쪽버튼을 눌러주세요';
-      this.speak(greetText);
+      startTospeak(intro + blank + pressLeft);
     }
   };
 
@@ -68,10 +72,6 @@ export default class TutorialScreen extends Component {
       isLeftCheck: false,
       isCenterCheck: false
     });
-  };
-
-  speak = thingToSay => {
-    Speech.speak(thingToSay);
   };
 
   render() {

@@ -11,17 +11,13 @@ import MainScreen from './screens/MainScreen';
 import CameraScreen from './screens/CameraScreen';
 // import PhotoScreen from './screens/PhotoScreen';
 
-
-
 export default class App extends Component {
   state = {
-    isReady: false,
+    isReady: false
   };
 
   async _loadAssetsAsync() {
-    const imageAssets = cacheImages([
-      require('./assets/logo.png')
-    ]);
+    const imageAssets = cacheImages([require('./assets/logo.png')]);
     const fontAssets = cacheFonts([FontAwesome.font]);
     await Promise.all([...imageAssets, ...fontAssets]);
   }
@@ -37,12 +33,7 @@ export default class App extends Component {
       );
     }
 
-    return (
-      <AppContainer
-        // screenProps={{
-        // }}
-      />
-    );
+    return <AppContainer />;
   }
 }
 
@@ -65,7 +56,7 @@ const AppSwitchNavigator = createSwitchNavigator(
     TutorialScreen,
     MainScreen,
     LocationScreen,
-    CameraScreen,
+    CameraScreen
     // PhotoScreen
   },
   {

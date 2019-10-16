@@ -6,9 +6,10 @@ import * as Speech from 'expo-speech';
 export default class CamearScreen extends Component {
 
   componentDidMount = () => {
+    const {speak} = this.props.screenProps;
     const greetText =
       '나의 시야 촬영화면 입니다.';
-    this.speak(greetText);
+    speak(greetText);
   };
 
   navigateBtn = navigate => {
