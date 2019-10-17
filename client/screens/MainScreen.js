@@ -22,6 +22,7 @@ export default class TutorialScreen extends Component {
   }
 
   render() {
+    console.log(process.env.API_KEY);
       return (
         <View style={styles.container}>
           <View style={styles.content}>
