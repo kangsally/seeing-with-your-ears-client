@@ -1,6 +1,6 @@
 const kakaoApi = {
   headers: {
-    Authorization: ''
+    Authorization: 'KakaoAK'
   }
 };
 

@@ -27,7 +27,6 @@ export default class LocationScreen extends Component {
     let currentAddress;
 
     getCurrentAddress(longitude, latitude).then(address => {
-
       currentAddress = address.documents[0].address.address_name;
       console.log(address);
       Promise.all([
@@ -47,32 +46,41 @@ export default class LocationScreen extends Component {
           currentLatitude: latitude,
           currentAddress: currentAddress,
           placeInfoScript: script,
-          placeList: placeList,
+          placeList: placeList
         });
-        startTospeak(greetText+ '나의 위치는 '+ this.state.currentAddress+ '입니다.' + this.state.placeInfoScript);
+        startTospeak(
+          greetText +
+            '나의 위치는 ' +
+            this.state.currentAddress +
+            '입니다.' +
+            this.state.placeInfoScript
+        );
       });
     });
-    // getLocationInfo(longitude, latitude, 'SW8'),
   }
 
-    navigateBtn = navigate => {
-      const { navigation } = this.props;
-      stopToSpeak();
-      if (navigate === 'right') {
-        this.setState({
-          hasLocationPermission: null,
-          currentLongitude: null,
-          currentLatitude: null,
-          currentAddress: null,
-          placeInfoScript: null,
-          placeList: null,
-        });
-        navigation.navigate('MainScreen');
-      } else if (navigate === 'left') {
-        startTospeak('나의 위치는 '+ this.state.currentAddress+ '입니다.' + this.state.placeInfoScript);
-      }
-    };
-  
+  navigateBtn = navigate => {
+    const { navigation } = this.props;
+    stopToSpeak();
+    if (navigate === 'right') {
+      this.setState({
+        hasLocationPermission: null,
+        currentLongitude: null,
+        currentLatitude: null,
+        currentAddress: null,
+        placeInfoScript: null,
+        placeList: null
+      });
+      navigation.navigate('MainScreen');
+    } else if (navigate === 'left') {
+      startTospeak(
+        '나의 위치는 ' +
+          this.state.currentAddress +
+          '입니다.' +
+          this.state.placeInfoScript
+      );
+    }
+  };
 
   render() {
     const {
@@ -97,16 +105,16 @@ export default class LocationScreen extends Component {
               }}
             >
               <Marker
-                title='나의 위치'
+                title="나의 위치"
                 description={this.state.currentAddress}
-                pinColor='blue'
+                pinColor="blue"
                 coordinate={{
                   latitude: this.state.currentLatitude,
                   longitude: this.state.currentLongitude
                 }}
                 onPress={ev => {
                   stopToSpeak();
-                  startTospeak('나의 위치')
+                  startTospeak('나의 위치');
                 }}
               />
               {this.state.placeList.map(place => (
@@ -124,7 +132,7 @@ export default class LocationScreen extends Component {
                   }}
                   onPress={ev => {
                     stopToSpeak();
-                    startTospeak(place.place_name)
+                    startTospeak(place.place_name);
                   }}
                 />
               ))}

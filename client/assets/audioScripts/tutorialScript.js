@@ -6,3 +6,12 @@ export const excellent = '잘하셨습니다.';
 export const error = '잘못누르셨습니다.';
 export const end = '귀로를 시작하시려면 오른쪽 버튼을 눌러주세요. 다시 튜토리얼을 진행하시려면 왼쪽 버튼을 눌러주세요.';
 export const blank = ' ';
+
+const directions = {
+    left: '왼쪽',
+    right: '오른쪽',
+    center: '중앙'
+};
+export const wordToKR = direction => directions[direction];
+export const errorMessageToKR = direction => `잘못 누르셨습니다. ${wordToKR(direction === 'left' ? 'right' : 'left')}버튼을 눌러주세요.`;
+export const successMessageToKR = direction => `잘하셨습니다. ${wordToKR(direction)}버튼을 눌러주세요.`;
