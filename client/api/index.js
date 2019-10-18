@@ -1,8 +1,16 @@
+import axios from 'axios';
+
 const kakaoApi = {
   headers: {
-    Authorization: 'KakaoAK'
+    Authorization: 'KakaoAK '
   }
 };
+
+const api = axios.create({
+  headers: {
+    'Authorization': 'KakaoAK '
+  }
+})
 
 export async function getLocationInfo(longitude, latitude, category) {
   try {
@@ -29,3 +37,11 @@ export async function getCurrentAddress(longitude, latitude) {
     console.error(error);
   }
 }
+
+export async function translateWord (obj) {
+  return api.get(
+    `https://kapi.kakao.com/v1/translation/translate?src_lang=en&target_lang=kr&query=${obj.class}`
+  ).then(word => {
+    obj.class = word.data.translated_text[0][0];
+  })
+};
