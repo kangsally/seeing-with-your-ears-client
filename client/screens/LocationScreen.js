@@ -6,8 +6,7 @@ import * as Location from 'expo-location';
 import * as Permissions from 'expo-permissions';
 import { startTospeak, stopToSpeak } from '../utils/utils.js';
 import { getLocationInfo, getCurrentAddress } from '../api/index.js';
-import { makePlaceInfoScript } from '../utils/utils.js';
-import { MaterialIcons } from '@expo/vector-icons';
+import { makePlaceInfoScript } from '../assets/audioScripts/audioScripts.js';
 
 export default class LocationScreen extends Component {
   state = {

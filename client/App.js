@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, Image } from 'react-native';
+import { Image } from 'react-native';
 import { AppLoading } from 'expo';
 import * as Font from 'expo-font';
 import { Asset } from 'expo-asset';
@@ -9,7 +9,6 @@ import TutorialScreen from './screens/TutorialScreen';
 import LocationScreen from './screens/LocationScreen';
 import MainScreen from './screens/MainScreen';
 import CameraScreen from './screens/CameraScreen';
-// import PhotoScreen from './screens/PhotoScreen';
 
 export default class App extends Component {
   state = {
@@ -57,7 +56,6 @@ const AppSwitchNavigator = createSwitchNavigator(
     MainScreen,
     LocationScreen,
     CameraScreen
-    // PhotoScreen
   },
   {
     initialRouteName: 'TutorialScreen'

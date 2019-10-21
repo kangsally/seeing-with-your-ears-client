@@ -1,13 +1,14 @@
 import React, { Component } from 'react';
-import { View, Text, StyleSheet, Image, ImageBackground } from 'react-native';
-import HomeButton from '../components/HomeButton';
-import { startTospeak, stopToSpeak } from '../utils/utils.js';
-import { translateWord } from '../api/index.js';
+import { View, Text, StyleSheet, ImageBackground } from 'react-native';
 import * as Permissions from 'expo-permissions';
 import { Camera } from 'expo-camera';
-import * as FileSystem from 'expo-file-system';
 import { GLView } from 'expo-gl';
 import Expo2DContext from 'expo-2d-context';
+import HomeButton from '../components/HomeButton';
+import { startTospeak, stopToSpeak } from '../utils/utils.js';
+import { translateWord, getReconizedByAIData } from '../api/index.js';
+import { makeObjDescrition } from '../assets/audioScripts/audioScripts';
+import { countBy, identity } from 'lodash';
 
 export default class CamearScreen extends Component {
   state = {
@@ -15,78 +16,64 @@ export default class CamearScreen extends Component {
     type: Camera.Constants.Type.back,
     isCaptured: false,
     photo: null,
-    objDataKr: [],
-    objDataEn: [],
+    objectData: [],
+    script: null
   };
 
   componentDidMount = async () => {
     const { status } = await Permissions.askAsync(Permissions.CAMERA);
-
-    this.setState({ hasCameraPermission: status === 'granted' });
     const greetText = '나의 시야 촬영화면 입니다.';
+    this.setState({ hasCameraPermission: status === 'granted' });
     startTospeak(greetText);
   };
 
   takePicture = async () => {
     if (this.camera) {
-      let photo = await this.camera.takePictureAsync({
+      const photo = await this.camera.takePictureAsync({
         quality: 0.5
       });
+      getReconizedByAIData(photo.uri).then(data => {
+        let nearObj = [];
+        let farObj = [];
+        let objectData = data.return_object.data;
 
-      this.setState({
-        photo: photo
+        Promise.all(
+          objectData.map(async obj => {
+            await translateWord(
+              obj,
+              nearObj,
+              farObj,
+              photo.height / 2
+            );
+          })
+        ).then(() => {
+          const script = makeObjDescrition(
+            countBy(nearObj, identity),
+            countBy(farObj, identity)
+          );
+          this.setState({
+            isCaptured: true,
+            objectData: objectData,
+            photo: photo,
+            script: script
+          });
+          startTospeak(this.state.script);
+        });
       });
-      const photoString = await FileSystem.readAsStringAsync(photo.uri, {
-        encoding: FileSystem.EncodingType.Base64
-      });
-      const requestJson = {
-        access_key: '',
-        argument: {
-          type: 'jpg',
-          file: photoString
-        }
-      };
-
-      const response = await fetch(
-        'http://aiopen.etri.re.kr:8000/ObjectDetect',
-        {
-          method: 'POST',
-          body: JSON.stringify(requestJson)
-        }
-      );
-      const data = await response.json();
-      this.setState({
-        objDataEn: data.return_object.data,
-        isCaptured: true
-      })
-      // let objData = data.return_object.data.slice();
-      // Promise.all(
-      //   objData.map(async obj => {
-      //     await translateWord(obj);
-      //   })
-      // ).then(() => {
-      //   this.setState({
-      //     objDataKr: objData,
-      //     isCaptured: true,
-      //   });
-      // });
     }
   };
 
-  _onGLContextCreate = async (gl, text, color) => {
-    var ctx = new Expo2DContext(gl);
+  onGLContextCreate = async gl => {
+    const ctx = new Expo2DContext(gl);
     await ctx.initializeText();
-    const ratioX = Math.abs(ctx.width/this.state.photo.width);
-    const ratioY = Math.abs(ctx.height/this.state.photo.height);
+    const ratioX = Math.abs(ctx.width / this.state.photo.width);
+    const ratioY = Math.abs(ctx.height / this.state.photo.height);
+    ctx.fillStyle = 'white';
+    ctx.font = 'italic 40pt sans-serif';
 
-    // ctx.fillStyle = color;
-    // ctx.fillRect(0, 0, ctx.width, ctx.height);
-    
-    this.state.objDataEn.forEach(obj => {
-      ctx.fillStyle = 'white';
-      ctx.font = 'italic 40pt sans-serif';
-      ctx.fillText(obj.class, obj.x*ratioX, obj.y*ratioY);
-    })
+    this.state.objectData.forEach(obj => {
+      ctx.fillText(obj.class, obj.x * ratioX, obj.y * ratioY);
+    });
     ctx.flush();
   };
 
@@ -112,9 +99,9 @@ export default class CamearScreen extends Component {
             }}
           >
             <GLView
-              style={{ flex: 1}}
+              style={{ flex: 1 }}
               onContextCreate={gl => {
-                this._onGLContextCreate(gl, 'View 1', 'transparent');
+                this.onGLContextCreate(gl);
               }}
             />
           </ImageBackground>

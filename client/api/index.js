@@ -1,4 +1,4 @@
-import axios from 'axios';
+import * as FileSystem from 'expo-file-system';
 
 const kakaoApi = {
   headers: {
@@ -6,11 +6,15 @@ const kakaoApi = {
   }
 };
 
-const api = axios.create({
-  headers: {
-    'Authorization': 'KakaoAK '
+const aiDataApi = photoString => {
+  return {
+    access_key: '',
+    argument: {
+      type: 'jpg',
+      file: photoString
+    }
   }
-})
+}
 
 export async function getLocationInfo(longitude, latitude, category) {
   try {
@@ -38,10 +42,35 @@ export async function getCurrentAddress(longitude, latitude) {
   }
 }
 
-export async function translateWord (obj) {
-  return api.get(
-    `https://kapi.kakao.com/v1/translation/translate?src_lang=en&target_lang=kr&query=${obj.class}`
-  ).then(word => {
-    obj.class = word.data.translated_text[0][0];
-  })
-};
+export async function translateWord(obj, nearObj, farObj, center) {
+  try {
+    const response = await fetch(
+      `https://kapi.kakao.com/v1/translation/translate?src_lang=en&target_lang=kr&query=${obj.class}`,
+      kakaoApi
+    );
+    const word = await response.json();
+    if (Number(obj.y) + Number(obj.height) > Number(center)) {
+      nearObj.push(word.translated_text[0][0]);
+    } else {
+      farObj.push(word.translated_text[0][0]);
+    }
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+export async function getReconizedByAIData (uri){
+  const photoString = await FileSystem.readAsStringAsync(uri, {
+    encoding: FileSystem.EncodingType.Base64
+  });
+  const response = await fetch(
+    'http://aiopen.etri.re.kr:8000/ObjectDetect',
+    {
+      method: 'POST',
+      body: JSON.stringify(aiDataApi(photoString))
+    }
+  );
+  
+  const data = await response.json();
+    return data;
+}

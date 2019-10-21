@@ -12,7 +12,7 @@ import {
   end,
   excellent,
   blank
-} from '../assets/audioScripts/tutorialScript';
+} from '../assets/audioScripts/audioScripts';
 
 export default class TutorialScreen extends Component {
   constructor(props) {
