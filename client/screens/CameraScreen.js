@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, StyleSheet, ImageBackground } from 'react-native';
+import { View, Text, StyleSheet, ImageBackground, Modal } from 'react-native';
 import * as Permissions from 'expo-permissions';
 import { Camera } from 'expo-camera';
 import { GLView } from 'expo-gl';
@@ -9,78 +9,118 @@ import { startTospeak, stopToSpeak } from '../utils/utils.js';
 import { translateWord, getReconizedByAIData } from '../api/index.js';
 import { makeObjDescrition } from '../assets/audioScripts/audioScripts';
 import { countBy, identity } from 'lodash';
+import MainButtons from '../components/MainButtons';
+import Loading from '../components/Loading';
+import InstructionBar from '../components/InstructionBar';
 
 export default class CamearScreen extends Component {
-  state = {
-    hasCameraPermission: null,
-    type: Camera.Constants.Type.back,
-    isCaptured: false,
-    photo: null,
-    objectData: [],
-    script: null
-  };
+  constructor(props) {
+    super(props);
+    this.state = {
+      hasCameraPermission: null,
+      type: Camera.Constants.Type.back,
+      isCaptured: false,
+      photo: null,
+      objectData: [],
+      script: null,
+      onLoad: false
+    };
+  }
+
 
   componentDidMount = async () => {
     const { status } = await Permissions.askAsync(Permissions.CAMERA);
-    const greetText = '나의 시야 촬영화면 입니다.';
     this.setState({ hasCameraPermission: status === 'granted' });
-    startTospeak(greetText);
+    startTospeak('나의 시야 촬영화면 입니다. 카메라를 눈높이에 맞춘 후 중앙버튼을 눌러주세요');
   };
 
+  componentWillUnmount = () => {
+    this.setState({
+      isCaptured: false,
+      photo: null,
+      objectData: [],
+      script: null,
+      onLoad: false
+    });
+  };
+
+  onLoad = () => {
+    this.setState({
+      onLoad: true
+    });
+  }
+
   takePicture = async () => {
+    stopToSpeak();
     if (this.camera) {
       const photo = await this.camera.takePictureAsync({
         quality: 0.5
       });
-      getReconizedByAIData(photo.uri).then(data => {
-        let nearObj = [];
-        let farObj = [];
-        let objectData = data.return_object.data;
+      const data = await getReconizedByAIData(photo.uri);
 
-        Promise.all(
-          objectData.map(async obj => {
-            await translateWord(
-              obj,
-              nearObj,
-              farObj,
-              photo.height / 2
-            );
-          })
-        ).then(() => {
-          const script = makeObjDescrition(
-            countBy(nearObj, identity),
-            countBy(farObj, identity)
-          );
-          this.setState({
-            isCaptured: true,
-            objectData: objectData,
-            photo: photo,
-            script: script
-          });
-          startTospeak(this.state.script);
-        });
+      let nearObj = [];
+      let farObj = [];
+      let objectData = data.return_object.data;
+
+      await Promise.all(
+        objectData.map(async obj => {
+          await translateWord(obj, nearObj, farObj, photo.height / 2);
+        })
+      );
+
+      const script = makeObjDescrition(
+        countBy(nearObj, identity),
+        countBy(farObj, identity)
+      );
+
+      this.setState({
+        isCaptured: true,
+        objectData: objectData,
+        photo: photo,
+        script: script,
+        onLoad: false
       });
+      startTospeak(this.state.script);
     }
   };
 
   onGLContextCreate = async gl => {
-    const ctx = new Expo2DContext(gl);
+    let ctx = new Expo2DContext(gl);
     await ctx.initializeText();
+
     const ratioX = Math.abs(ctx.width / this.state.photo.width);
     const ratioY = Math.abs(ctx.height / this.state.photo.height);
+
     ctx.fillStyle = 'white';
-    ctx.font = 'italic 40pt sans-serif';
+    ctx.font = '60pt sans-serif';
 
     this.state.objectData.forEach(obj => {
       ctx.fillText(obj.class, obj.x * ratioX, obj.y * ratioY);
     });
+
     ctx.flush();
   };
 
+  navigateBtn = navigate => {
+    const { navigation } = this.props;
+    stopToSpeak();
+    if (navigate === 'right') {
+      navigation.navigate('MainScreen');
+    } else if (navigate === 'left') {
+      this.setState({
+        isCaptured: false,
+        photo: null,
+        objectData: [],
+        script: null
+      });
+      startTospeak('카메라를 눈높이에 맞춘 후 중앙버튼을 눌러주세요');
+    }
+  };
+
   render() {
-    const { hasCameraPermission } = this.state;
+    const { hasCameraPermission, onLoad } = this.state;
     if (hasCameraPermission === null) {
-      return <View />;
+      return <Loading />
     } else if (hasCameraPermission === false) {
       return <Text>No access to camera</Text>;
     } else if (this.state.isCaptured) {
@@ -105,29 +145,41 @@ export default class CamearScreen extends Component {
               }}
             />
           </ImageBackground>
-
-          <HomeButton onPressBtn={this.takePicture} />
+          <MainButtons onPressBtn={this.navigateBtn} />
         </View>
       );
     }
     return (
       <View style={styles.container}>
-        <Camera
-          style={styles.camera}
-          type={this.state.type}
-          ref={ref => {
-            this.camera = ref;
-          }}
-        >
-          <View
-            style={{
-              flex: 1,
-              backgroundColor: 'transparent',
-              flexDirection: 'row'
-            }}
-          ></View>
-        </Camera>
-        <HomeButton onPressBtn={this.takePicture} />
+        <Modal
+          animationType="fade"
+          visible={onLoad}
+          presentationStyle='fullScreen'
+        ><Loading /></Modal>
+        <View style={styles.content}>
+          <View style={{ flex: 8 }}>
+            <Camera
+              style={styles.camera}
+              type={this.state.type}
+              ref={ref => {
+                this.camera = ref;
+              }}
+            >
+              <View
+                style={{
+                  flex: 1,
+                  backgroundColor: 'transparent',
+                  flexDirection: 'row'
+                }}
+              ></View>
+            </Camera>
+          </View>
+          <InstructionBar content="나의 시야 안내" />
+        </View>
+        <HomeButton onPressBtn={() => {
+          this.onLoad()
+          this.takePicture()
+        }} />
       </View>
     );
   }
@@ -136,6 +188,10 @@ export default class CamearScreen extends Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1
+  },
+  content: {
+    flex: 2,
+    backgroundColor: '#1A1A1A'
   },
   text: {
     color: 'white',

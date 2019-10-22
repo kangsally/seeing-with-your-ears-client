@@ -1,14 +1,16 @@
 import * as FileSystem from 'expo-file-system';
+import getEnvVars from '../environment';
+const { kakaoApiKey, aiDataApiKey } = getEnvVars();
 
 const kakaoApi = {
   headers: {
-    Authorization: 'KakaoAK '
+    Authorization: kakaoApiKey
   }
 };
 
 const aiDataApi = photoString => {
   return {
-    access_key: '',
+    access_key: aiDataApiKey,
     argument: {
       type: 'jpg',
       file: photoString

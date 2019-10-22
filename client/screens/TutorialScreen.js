@@ -15,7 +15,6 @@ import {
   excellent,
   blank
 } from '../assets/audioScripts/audioScripts';
-import { Header, Title } from 'native-base';
 
 export default class TutorialScreen extends Component {
   constructor(props) {
@@ -25,7 +24,6 @@ export default class TutorialScreen extends Component {
       isLeftCheck: false,
       isCenterCheck: false
     };
-    this.checkBtn = this.checkBtn.bind(this);
   }
 
   componentDidMount = () => {
@@ -58,6 +56,7 @@ export default class TutorialScreen extends Component {
     const { navigation } = this.props;
     stopToSpeak();
     if (navigate === 'right') {
+      startTospeak('귀로를 시작합니다.');
       navigation.navigate('MainScreen');
     } else if (navigate === 'left') {
       this.setState({

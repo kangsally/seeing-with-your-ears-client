@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import MainButtons from '../components/MainButtons';
 import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
@@ -7,6 +7,8 @@ import * as Permissions from 'expo-permissions';
 import { startTospeak, stopToSpeak } from '../utils/utils.js';
 import { getLocationInfo, getCurrentAddress } from '../api/index.js';
 import { makePlaceInfoScript } from '../assets/audioScripts/audioScripts.js';
+import InstructionBar from '../components/InstructionBar';
+import Loading from '../components/Loading';
 
 export default class LocationScreen extends Component {
   state = {
@@ -22,7 +24,7 @@ export default class LocationScreen extends Component {
     const { status } = await Permissions.askAsync(Permissions.LOCATION);
     const { coords } = await Location.getCurrentPositionAsync();
     const { longitude, latitude } = coords;
-    const greetText = '나의 위치 안내 화면 입니다.';
+    const greetText = '나의 위치를 안내해드리겠습니다.';
     let currentAddress;
 
     getCurrentAddress(longitude, latitude).then(address => {
@@ -77,7 +79,7 @@ export default class LocationScreen extends Component {
           this.state.currentAddress +
           '입니다.' +
           this.state.placeInfoScript
-      );
+      );ㄴ
     }
   };
 
@@ -88,54 +90,57 @@ export default class LocationScreen extends Component {
       currentLatitude
     } = this.state;
     if (!hasLocationPermission || !currentLongitude || !currentLatitude) {
-      return <View></View>;
+      return <Loading />;
     } else {
       return (
         <View style={styles.container}>
           <View style={styles.content}>
-            <MapView
-              provider={PROVIDER_GOOGLE}
-              style={{ width: '100%', height: '100%' }}
-              initialRegion={{
-                latitude: currentLatitude,
-                longitude: currentLongitude,
-                latitudeDelta: 0.01,
-                longitudeDelta: 0.01
-              }}
-            >
-              <Marker
-                title="나의 위치"
-                description={this.state.currentAddress}
-                pinColor="blue"
-                coordinate={{
-                  latitude: this.state.currentLatitude,
-                  longitude: this.state.currentLongitude
+            <View style={{ flex: 8 }}>
+              <MapView
+                provider={PROVIDER_GOOGLE}
+                style={{ width: '100%', height: '100%' }}
+                initialRegion={{
+                  latitude: currentLatitude,
+                  longitude: currentLongitude,
+                  latitudeDelta: 0.01,
+                  longitudeDelta: 0.01
                 }}
-                onPress={ev => {
-                  stopToSpeak();
-                  startTospeak('나의 위치');
-                }}
-              />
-              {this.state.placeList.map(place => (
+              >
                 <Marker
-                  key={place.id}
-                  title={place.place_name}
-                  description={
-                    place.road_address_name
-                      ? place.road_address_name
-                      : place.address_name
-                  }
+                  title="나의 위치"
+                  description={this.state.currentAddress}
+                  pinColor="blue"
                   coordinate={{
-                    latitude: Number(place.y),
-                    longitude: Number(place.x)
+                    latitude: this.state.currentLatitude,
+                    longitude: this.state.currentLongitude
                   }}
                   onPress={ev => {
                     stopToSpeak();
-                    startTospeak(place.place_name);
+                    startTospeak('나의 위치');
                   }}
                 />
-              ))}
-            </MapView>
+                {this.state.placeList.map(place => (
+                  <Marker
+                    key={place.id}
+                    title={place.place_name}
+                    description={
+                      place.road_address_name
+                        ? place.road_address_name
+                        : place.address_name
+                    }
+                    coordinate={{
+                      latitude: Number(place.y),
+                      longitude: Number(place.x)
+                    }}
+                    onPress={ev => {
+                      stopToSpeak();
+                      startTospeak(place.place_name);
+                    }}
+                  />
+                ))}
+              </MapView>
+            </View>
+            <InstructionBar content="나의 위치 안내" />
           </View>
           <MainButtons onPressBtn={this.navigateBtn} />
         </View>
@@ -150,10 +155,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 2,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'black',
-    color: 'white'
+    backgroundColor: '#CCCCCC'
   },
   text: {
     color: 'white',

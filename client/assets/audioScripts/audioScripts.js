@@ -1,7 +1,7 @@
 import { forEach } from 'lodash';
 
 export const intro =
-  '귀로 튜토리얼입니다. 스크린 하단 3분의 1지점에 버튼이 있으며, 해당 버튼은 중앙버튼 한개인 경우와 왼쪽과 오른쪽버튼 두개인 경우가 있습니다.';
+  '안녕하세요 귀로입니다. 스크린 하단 3분의 1지점에 버튼이 있으며, 해당 버튼은 중앙버튼 한개인 경우와 왼쪽과 오른쪽버튼 두개인 경우가 있습니다.';
 export const pressLeft = '왼쪽버튼을 눌러주세요.';
 export const pressRight = '오른쪽버튼을 눌러주세요.';
 export const pressCenter = '중앙버튼을 눌러주세요.';
@@ -70,13 +70,13 @@ export const makeObjDescrition = (nearObj, farObj) => {
   if (script === '') {
     script += '인식된 객체가 없습니다.';
   }
-
+  script +='다시 촬영하시려면 왼쪽버튼, 시작화면으로 가시려면 오른쪽 버튼을 눌러주세요.'
   return script;
 };
 
 export const makePlaceInfoScript = (places, longitude, latitude) => {
     const blank = ' ';
-    let script = '반경 1km내 가장 가까운 장소정보입니다.' + blank;
+    let script = '반경 1km내 가장 가까운 장소정보를 안내해드리겠습니다.' + blank;
     let placeList = [];
     places.forEach(place => {
       const { documents } = place;
@@ -95,5 +95,6 @@ export const makePlaceInfoScript = (places, longitude, latitude) => {
         placeList.push(info);
       }
     });
+    script += '다시 들으시려면 왼쪽버튼, 시작화면으로 가시려면 오른쪽 버튼을 눌러주세요.'
     return { script: script, placeList: placeList };
   };
