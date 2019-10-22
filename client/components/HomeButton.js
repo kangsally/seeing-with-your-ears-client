@@ -1,5 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+
 
 export default function HomeButton(props) {
   return (
@@ -11,7 +13,8 @@ export default function HomeButton(props) {
         }}
         accessibilityLabel='center'
       >
-        <Text style={styles.text}>중앙</Text>
+        
+    <MaterialCommunityIcons name='camera-iris' size={70}  />
       </TouchableOpacity>
     </View>
   );
@@ -29,7 +32,7 @@ const styles = StyleSheet.create({
     alignSelf: 'stretch',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'blue'
+    backgroundColor: '#EAEDEC'
   },
   text: {
     color: 'white',

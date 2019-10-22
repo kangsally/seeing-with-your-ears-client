@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { Entypo } from '@expo/vector-icons';
 
 export default function MainButtons(props) {
 
@@ -12,16 +13,16 @@ export default function MainButtons(props) {
         }}
         accessibilityLabel="left"
       >
-        <Text style={styles.text}>왼쪽</Text>
+      <Entypo name='triangle-left' size={40} color="black" />
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.right}
         onPress={() => {
           props.onPressBtn('right');
         }}
-        accessibilityLabel="right"
+        accessibilityLabel='right'
       >
-        <Text style={styles.text}>오른쪽</Text>
+        <Entypo name='triangle-right' size={40} color="black" />
       </TouchableOpacity>
     </View>
   );
@@ -39,14 +40,18 @@ const styles = StyleSheet.create({
     alignSelf: 'stretch',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'yellow'
+    backgroundColor: '#EAEDEC',
+    borderLeftWidth: 0.5,
+    borderLeftColor: '#868e96',
   },
   left: {
     flex: 1,
     alignSelf: 'stretch',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'red'
+    backgroundColor: '#EAEDEC',
+    borderRightWidth: 0.5,
+    borderRightColor: '#868e96',
   },
   text: {
     color: 'white',

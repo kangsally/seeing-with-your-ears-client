@@ -8,7 +8,7 @@ export const pressCenter = '중앙버튼을 눌러주세요.';
 export const excellent = '잘하셨습니다.';
 export const error = '잘못누르셨습니다.';
 export const end =
-  '귀로를 시작하시려면 오른쪽 버튼을 눌러주세요. 다시 튜토리얼을 진행하시려면 왼쪽 버튼을 눌러주세요.';
+  '튜토리얼을 완료하셨습니다. 다음에 앱을 실행하실때 튜토리얼을 원하지 않으시면 오른쪽 버튼을 눌러주세요. 다음에 앱을 실행하실때도 튜토리얼을 들으시려면 왼쪽 버튼을 눌러주세요';
 export const blank = ' ';
 
 const directions = {

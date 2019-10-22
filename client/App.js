@@ -1,14 +1,17 @@
 import React, { Component } from 'react';
-import { Image } from 'react-native';
+import { SafeAreaView, Platform, AsyncStorage } from 'react-native';
 import { AppLoading } from 'expo';
 import * as Font from 'expo-font';
 import { Asset } from 'expo-asset';
-import { FontAwesome } from '@expo/vector-icons';
+import { FontAwesome, Ionicons } from '@expo/vector-icons';
 import { createSwitchNavigator, createAppContainer } from 'react-navigation';
 import TutorialScreen from './screens/TutorialScreen';
 import LocationScreen from './screens/LocationScreen';
 import MainScreen from './screens/MainScreen';
 import CameraScreen from './screens/CameraScreen';
+import { View } from 'native-base';
+let AppContainer;
+
 
 export default class App extends Component {
   state = {
@@ -16,9 +19,13 @@ export default class App extends Component {
   };
 
   async _loadAssetsAsync() {
-    const imageAssets = cacheImages([require('./assets/logo.png')]);
-    const fontAssets = cacheFonts([FontAwesome.font]);
-    await Promise.all([...imageAssets, ...fontAssets]);
+    await Asset.fromModule(require('./assets/logo.png')).downloadAsync();
+    await Font.loadAsync({
+      Roboto: require('native-base/Fonts/Roboto.ttf'),
+      Roboto_medium: require('native-base/Fonts/Roboto_medium.ttf'),
+      ...Ionicons.font,
+      ...FontAwesome.font
+    });
   }
 
   render() {
@@ -30,36 +37,35 @@ export default class App extends Component {
           onError={console.warn}
         />
       );
-    }
-
-    return <AppContainer />;
-  }
-}
-
-function cacheImages(images) {
-  return images.map(image => {
-    if (typeof image === 'string') {
-      return Image.prefetch(image);
     } else {
-      return Asset.fromModule(image).downloadAsync();
+      if (Platform.OS !== 'android') {
+        return (
+          <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
+            <AppContainer />
+          </SafeAreaView>
+        );
+      }
+      return (
+        <>
+          <View style={{ height: 24 }}></View>
+          <AppContainer />
+        </>
+      );
     }
-  });
-}
-
-function cacheFonts(fonts) {
-  return fonts.map(font => Font.loadAsync(font));
-}
-
-const AppSwitchNavigator = createSwitchNavigator(
-  {
-    TutorialScreen,
-    MainScreen,
-    LocationScreen,
-    CameraScreen
-  },
-  {
-    initialRouteName: 'TutorialScreen'
   }
-);
+}
 
-const AppContainer = createAppContainer(AppSwitchNavigator);
+AsyncStorage.getItem('tutorialComplete').then(tutorialCheck => {
+  const AppSwitchNavigator = createSwitchNavigator(
+    {
+      TutorialScreen,
+      MainScreen,
+      LocationScreen,
+      CameraScreen
+    },
+    {
+      initialRouteName: `${ tutorialCheck === null || tutorialCheck === 'notCompleted' ? 'TutorialScreen' : 'MainScreen' }`
+    }
+  );
+  AppContainer = createAppContainer(AppSwitchNavigator);
+})
