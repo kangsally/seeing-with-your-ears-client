@@ -1,7 +1,7 @@
 import * as FileSystem from 'expo-file-system';
 import getEnvVars from '../environment';
+import { forEach } from 'lodash';
 const { kakaoApiKey, aiDataApiKey } = getEnvVars();
-
 const kakaoApi = {
   headers: {
     Authorization: kakaoApiKey
@@ -15,8 +15,14 @@ const aiDataApi = photoString => {
       type: 'jpg',
       file: photoString
     }
-  }
-}
+  };
+};
+
+export const subway = 'SW8';
+export const hospital = 'HP8';
+export const pharmacy = 'PM9';
+export const convenientStore = 'CS2';
+export const locationCategory = [subway, hospital, pharmacy, convenientStore];
 
 export async function getLocationInfo(longitude, latitude, category) {
   try {
@@ -61,18 +67,15 @@ export async function translateWord(obj, nearObj, farObj, center) {
   }
 }
 
-export async function getReconizedByAIData (uri){
+export async function getReconizedByAIData(uri) {
   const photoString = await FileSystem.readAsStringAsync(uri, {
     encoding: FileSystem.EncodingType.Base64
   });
-  const response = await fetch(
-    'http://aiopen.etri.re.kr:8000/ObjectDetect',
-    {
-      method: 'POST',
-      body: JSON.stringify(aiDataApi(photoString))
-    }
-  );
-  
+  const response = await fetch('http://aiopen.etri.re.kr:8000/ObjectDetect', {
+    method: 'POST',
+    body: JSON.stringify(aiDataApi(photoString))
+  });
+
   const data = await response.json();
-    return data;
+  return data;
 }

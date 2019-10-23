@@ -1,14 +1,23 @@
 import React, { Component } from 'react';
 import { View, StyleSheet } from 'react-native';
-import MainButtons from '../components/MainButtons';
 import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import * as Permissions from 'expo-permissions';
-import { startTospeak, stopToSpeak } from '../utils/utils.js';
-import { getLocationInfo, getCurrentAddress } from '../api/index.js';
-import { makePlaceInfoScript } from '../assets/audioScripts/audioScripts.js';
-import InstructionBar from '../components/InstructionBar';
 import Loading from '../components/Loading';
+import MainButtons from '../components/MainButtons';
+import InstructionBar from '../components/InstructionBar';
+import {
+  getLocationInfo,
+  getCurrentAddress,
+  locationCategory
+} from '../api/index.js';
+import { startTospeak, stopToSpeak } from '../utils/utils.js';
+import { MY_LOCATION_TITLE } from '../constants/titles.js';
+import { MAIN_SCREEN } from '../constants/screens.js';
+import {
+  makePlaceInfoScript,
+  makeLocationScreenScript
+} from '../assets/audioScripts/audioScripts.js';
 
 export default class LocationScreen extends Component {
   state = {
@@ -24,62 +33,51 @@ export default class LocationScreen extends Component {
     const { status } = await Permissions.askAsync(Permissions.LOCATION);
     const { coords } = await Location.getCurrentPositionAsync();
     const { longitude, latitude } = coords;
-    const greetText = '나의 위치를 안내해드리겠습니다.';
-    let currentAddress;
+    const currentAddressData = await getCurrentAddress(longitude, latitude);
+    const currentAddress = currentAddressData.documents[0].address.address_name;
 
-    getCurrentAddress(longitude, latitude).then(address => {
-      currentAddress = address.documents[0].address.address_name;
-      console.log(address);
-      Promise.all([
-        getLocationInfo(longitude, latitude, 'SW8'),
-        getLocationInfo(longitude, latitude, 'HP8'),
-        getLocationInfo(longitude, latitude, 'PM9'),
-        getLocationInfo(longitude, latitude, 'CS2')
-      ]).then(places => {
-        const { script, placeList } = makePlaceInfoScript(
-          places,
-          longitude,
-          latitude
-        );
-        this.setState({
-          hasLocationPermission: status === 'granted',
-          currentLongitude: longitude,
-          currentLatitude: latitude,
-          currentAddress: currentAddress,
-          placeInfoScript: script,
-          placeList: placeList
-        });
-        startTospeak(
-          greetText +
-            '나의 위치는 ' +
-            this.state.currentAddress +
-            '입니다.' +
-            this.state.placeInfoScript
-        );
-      });
+    const places = await Promise.all(
+      locationCategory.map(async category =>
+        getLocationInfo(longitude, latitude, category)
+      )
+    );
+
+    const { script, placeList } = makePlaceInfoScript(
+      places,
+      longitude,
+      latitude
+    );
+
+    this.setState({
+      hasLocationPermission: status === 'granted',
+      currentLongitude: longitude,
+      currentLatitude: latitude,
+      currentAddress: currentAddress,
+      placeInfoScript: script,
+      placeList: placeList
     });
+
+    startTospeak(
+      makeLocationScreenScript(
+        this.state.currentAddress,
+        this.state.placeInfoScript
+      )
+    );
   }
 
   navigateBtn = navigate => {
     const { navigation } = this.props;
     stopToSpeak();
+
     if (navigate === 'right') {
-      this.setState({
-        hasLocationPermission: null,
-        currentLongitude: null,
-        currentLatitude: null,
-        currentAddress: null,
-        placeInfoScript: null,
-        placeList: null
-      });
-      navigation.navigate('MainScreen');
+      navigation.navigate(MAIN_SCREEN);
     } else if (navigate === 'left') {
       startTospeak(
-        '나의 위치는 ' +
-          this.state.currentAddress +
-          '입니다.' +
+        makeLocationScreenScript(
+          this.state.currentAddress,
           this.state.placeInfoScript
-      );ㄴ
+        )
+      );
     }
   };
 
@@ -95,10 +93,10 @@ export default class LocationScreen extends Component {
       return (
         <View style={styles.container}>
           <View style={styles.content}>
-            <View style={{ flex: 8 }}>
+            <View style={styles.mapBox}>
               <MapView
                 provider={PROVIDER_GOOGLE}
-                style={{ width: '100%', height: '100%' }}
+                style={styles.mapView}
                 initialRegion={{
                   latitude: currentLatitude,
                   longitude: currentLongitude,
@@ -107,8 +105,7 @@ export default class LocationScreen extends Component {
                 }}
               >
                 <Marker
-                  title="나의 위치"
-                  description={this.state.currentAddress}
+                  title={this.state.currentAddress}
                   pinColor="blue"
                   coordinate={{
                     latitude: this.state.currentLatitude,
@@ -116,7 +113,7 @@ export default class LocationScreen extends Component {
                   }}
                   onPress={ev => {
                     stopToSpeak();
-                    startTospeak('나의 위치');
+                    startTospeak(this.state.currentAddress);
                   }}
                 />
                 {this.state.placeList.map(place => (
@@ -140,7 +137,7 @@ export default class LocationScreen extends Component {
                 ))}
               </MapView>
             </View>
-            <InstructionBar content="나의 위치 안내" />
+            <InstructionBar content={MY_LOCATION_TITLE} />
           </View>
           <MainButtons onPressBtn={this.navigateBtn} />
         </View>
@@ -157,9 +154,11 @@ const styles = StyleSheet.create({
     flex: 2,
     backgroundColor: '#CCCCCC'
   },
-  text: {
-    color: 'white',
-    fontSize: 30,
-    fontWeight: 'bold'
+  mapBox: {
+    flex: 8
+  },
+  mapView: {
+    width: '100%',
+    height: '100%'
   }
 });

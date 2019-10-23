@@ -1,15 +1,19 @@
 import { forEach } from 'lodash';
 
 export const intro =
-  '안녕하세요 귀로입니다. 스크린 하단 3분의 1지점에 버튼이 있으며, 해당 버튼은 중앙버튼 한개인 경우와 왼쪽과 오른쪽버튼 두개인 경우가 있습니다.';
-export const pressLeft = '왼쪽버튼을 눌러주세요.';
-export const pressRight = '오른쪽버튼을 눌러주세요.';
-export const pressCenter = '중앙버튼을 눌러주세요.';
-export const excellent = '잘하셨습니다.';
-export const error = '잘못누르셨습니다.';
+  '안녕하세요 귀로입니다. 귀로는 청각으로 나의 위치 정보와 시야 정보를 들을 수 있는 어플리케이션입니다. 튜토리얼을 진행하겠습니다. 스크린 하단 3분의 1지점에 버튼이 있으며, 왼쪽과 오른쪽버튼 두개 또는 가운데 사진촬영버튼이 있습니다.';
+// export const pressLeft = '왼쪽 버튼을 눌러주세요.';
+// export const pressRight = '오른쪽 버튼을 눌러주세요.';
+// export const pressCenter = '중앙 버튼을 눌러주세요.';
+// export const excellent = '잘하셨습니다.';
+// export const error = '잘못누르셨습니다.';
 export const end =
-  '튜토리얼을 완료하셨습니다. 다음에 앱을 실행하실때 튜토리얼을 원하지 않으시면 오른쪽 버튼을 눌러주세요. 다음에 앱을 실행하실때도 튜토리얼을 들으시려면 왼쪽 버튼을 눌러주세요';
-export const blank = ' ';
+  '튜토리얼을 완료하셨습니다. 다음에 앱을 실행하실때도 튜토리얼을 들으시려면 왼쪽 버튼을 눌러주세요. 다음에 앱을 실행하실때 튜토리얼을 원하지 않으시면 오른쪽 버튼을 눌러주세요.';
+// export const blank = ' ';
+
+export const mainScreenStartScript =  '나의 위치를 들으시려면 왼쪽버튼, 나의 시야를 들으시려면 오른쪽버튼을 눌러주세요.';
+export const locationScreenStartScript = '나의 위치를 안내해드리겠습니다. 나의 현재 위치는 ';
+export const cameraScreenStartScript = '나의 시야 촬영화면 입니다. 카메라를 눈높이에 맞춘 후 중앙버튼을 눌러주세요';
 
 const directions = {
   left: '왼쪽',
@@ -31,13 +35,17 @@ const numbers = {
   11: '열개 이상'
 };
 
-export const wordToKR = direction => directions[direction];
-export const errorMessageToKR = direction =>
-  `잘못 누르셨습니다. ${wordToKR(
+const getDirection = direction => directions[direction];
+
+export const makeErrorMessage = direction =>
+  `잘못 누르셨습니다. ${getDirection(
     direction === 'left' ? 'right' : 'left'
   )}버튼을 눌러주세요.`;
-export const successMessageToKR = direction =>
-  `잘하셨습니다. ${wordToKR(direction)}버튼을 눌러주세요.`;
+
+export const makeSuccessMessage = direction =>
+  `잘하셨습니다. ${getDirection(
+    direction === 'left' ? 'right' : 'center'
+    )}버튼을 눌러주세요.`;
 
 const changeNumberToscript = (num, data) => {
   if (num <= 10) {
@@ -46,6 +54,7 @@ const changeNumberToscript = (num, data) => {
     return data[11];
   }
 };
+
 
 export const makeObjDescrition = (nearObj, farObj) => {
   let script = '';
@@ -70,7 +79,7 @@ export const makeObjDescrition = (nearObj, farObj) => {
   if (script === '') {
     script += '인식된 객체가 없습니다.';
   }
-  script +='다시 촬영하시려면 왼쪽버튼, 시작화면으로 가시려면 오른쪽 버튼을 눌러주세요.'
+  script +='다시 촬영하시려면 왼쪽버튼, 시작화면으로 가시려면 오른쪽 버튼을 눌러주세요.';
   return script;
 };
 
@@ -98,3 +107,7 @@ export const makePlaceInfoScript = (places, longitude, latitude) => {
     script += '다시 들으시려면 왼쪽버튼, 시작화면으로 가시려면 오른쪽 버튼을 눌러주세요.'
     return { script: script, placeList: placeList };
   };
+
+export const makeLocationScreenScript = (currentAddress, placeInfo) => (
+  '나의 위치를 안내해드리겠습니다. 나의 현재 위치는 '+ currentAddress + '입니다. ' + placeInfo
+)

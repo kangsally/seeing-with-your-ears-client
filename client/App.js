@@ -1,17 +1,13 @@
 import React, { Component } from 'react';
-import { SafeAreaView, Platform, AsyncStorage } from 'react-native';
-import { AppLoading } from 'expo';
-import * as Font from 'expo-font';
-import { Asset } from 'expo-asset';
-import { FontAwesome, Ionicons } from '@expo/vector-icons';
+import { SafeAreaView, Platform, AsyncStorage, View, StyleSheet } from 'react-native';
 import { createSwitchNavigator, createAppContainer } from 'react-navigation';
+import { AppLoading } from 'expo';
+import { Asset } from 'expo-asset';
 import TutorialScreen from './screens/TutorialScreen';
 import LocationScreen from './screens/LocationScreen';
 import MainScreen from './screens/MainScreen';
 import CameraScreen from './screens/CameraScreen';
-import { View } from 'native-base';
 let AppContainer;
-
 
 export default class App extends Component {
   state = {
@@ -20,12 +16,6 @@ export default class App extends Component {
 
   async _loadAssetsAsync() {
     await Asset.fromModule(require('./assets/logo.png')).downloadAsync();
-    await Font.loadAsync({
-      Roboto: require('native-base/Fonts/Roboto.ttf'),
-      Roboto_medium: require('native-base/Fonts/Roboto_medium.ttf'),
-      ...Ionicons.font,
-      ...FontAwesome.font
-    });
   }
 
   render() {
@@ -40,14 +30,14 @@ export default class App extends Component {
     } else {
       if (Platform.OS !== 'android') {
         return (
-          <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
+          <SafeAreaView style={styles.ios}>
             <AppContainer />
           </SafeAreaView>
         );
       }
       return (
         <>
-          <View style={{ height: 24 }}></View>
+          <View style={styles.android}/>
           <AppContainer />
         </>
       );
@@ -64,8 +54,22 @@ AsyncStorage.getItem('tutorialComplete').then(tutorialCheck => {
       CameraScreen
     },
     {
-      initialRouteName: `${ tutorialCheck === null || tutorialCheck === 'notCompleted' ? 'TutorialScreen' : 'MainScreen' }`
+      initialRouteName: `${
+        tutorialCheck === null || tutorialCheck === 'notCompleted'
+          ? 'TutorialScreen'
+          : 'MainScreen'
+      }`
     }
   );
   AppContainer = createAppContainer(AppSwitchNavigator);
-})
+});
+
+const styles = StyleSheet.create({
+  ios: { 
+    flex: 1, 
+    backgroundColor: '#fff' 
+  },
+  android: {
+    height: 24 
+  }
+});

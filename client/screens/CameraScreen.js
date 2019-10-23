@@ -5,13 +5,18 @@ import { Camera } from 'expo-camera';
 import { GLView } from 'expo-gl';
 import Expo2DContext from 'expo-2d-context';
 import HomeButton from '../components/HomeButton';
-import { startTospeak, stopToSpeak } from '../utils/utils.js';
-import { translateWord, getReconizedByAIData } from '../api/index.js';
-import { makeObjDescrition } from '../assets/audioScripts/audioScripts';
-import { countBy, identity } from 'lodash';
 import MainButtons from '../components/MainButtons';
 import Loading from '../components/Loading';
 import InstructionBar from '../components/InstructionBar';
+import { translateWord, getReconizedByAIData } from '../api/index.js';
+import { startTospeak, stopToSpeak } from '../utils/utils.js';
+import { MY_VIEW_TITLE } from '../constants/titles.js';
+import { MAIN_SCREEN } from '../constants/screens.js';
+import {
+  makeObjDescrition,
+  cameraScreenStartScript
+} from '../assets/audioScripts/audioScripts';
+import { countBy, identity } from 'lodash';
 
 export default class CamearScreen extends Component {
   constructor(props) {
@@ -27,11 +32,10 @@ export default class CamearScreen extends Component {
     };
   }
 
-
   componentDidMount = async () => {
     const { status } = await Permissions.askAsync(Permissions.CAMERA);
     this.setState({ hasCameraPermission: status === 'granted' });
-    startTospeak('나의 시야 촬영화면 입니다. 카메라를 눈높이에 맞춘 후 중앙버튼을 눌러주세요');
+    startTospeak(cameraScreenStartScript);
   };
 
   componentWillUnmount = () => {
@@ -48,7 +52,7 @@ export default class CamearScreen extends Component {
     this.setState({
       onLoad: true
     });
-  }
+  };
 
   takePicture = async () => {
     stopToSpeak();
@@ -105,7 +109,7 @@ export default class CamearScreen extends Component {
     const { navigation } = this.props;
     stopToSpeak();
     if (navigate === 'right') {
-      navigation.navigate('MainScreen');
+      navigation.navigate(MAIN_SCREEN);
     } else if (navigate === 'left') {
       this.setState({
         isCaptured: false,
@@ -113,24 +117,21 @@ export default class CamearScreen extends Component {
         objectData: [],
         script: null
       });
-      startTospeak('카메라를 눈높이에 맞춘 후 중앙버튼을 눌러주세요');
+      startTospeak(cameraScreenStartScript);
     }
   };
 
   render() {
     const { hasCameraPermission, onLoad } = this.state;
     if (hasCameraPermission === null) {
-      return <Loading />
+      return <Loading />;
     } else if (hasCameraPermission === false) {
       return <Text>No access to camera</Text>;
     } else if (this.state.isCaptured) {
       return (
         <View style={styles.container}>
           <ImageBackground
-            style={{
-              flex: 2,
-              resizeMode: 'contain'
-            }}
+            style={styles.photo}
             source={{
               uri: this.state.photo.uri
             }}
@@ -139,7 +140,7 @@ export default class CamearScreen extends Component {
             }}
           >
             <GLView
-              style={{ flex: 1 }}
+              style={styles.canvas}
               onContextCreate={gl => {
                 this.onGLContextCreate(gl);
               }}
@@ -154,32 +155,28 @@ export default class CamearScreen extends Component {
         <Modal
           animationType="fade"
           visible={onLoad}
-          presentationStyle='fullScreen'
-        ><Loading /></Modal>
+          presentationStyle="fullScreen"
+        >
+          <Loading />
+        </Modal>
         <View style={styles.content}>
-          <View style={{ flex: 8 }}>
+          <View style={styles.cameraBox}>
             <Camera
               style={styles.camera}
               type={this.state.type}
               ref={ref => {
                 this.camera = ref;
               }}
-            >
-              <View
-                style={{
-                  flex: 1,
-                  backgroundColor: 'transparent',
-                  flexDirection: 'row'
-                }}
-              ></View>
-            </Camera>
+            />
           </View>
-          <InstructionBar content="나의 시야 안내" />
+          <InstructionBar content={MY_VIEW_TITLE} />
         </View>
-        <HomeButton onPressBtn={() => {
-          this.onLoad()
-          this.takePicture()
-        }} />
+        <HomeButton
+          onPressBtn={() => {
+            this.onLoad();
+            this.takePicture();
+          }}
+        />
       </View>
     );
   }
@@ -193,12 +190,17 @@ const styles = StyleSheet.create({
     flex: 2,
     backgroundColor: '#1A1A1A'
   },
-  text: {
-    color: 'white',
-    fontSize: 30,
-    fontWeight: 'bold'
-  },
   camera: {
     flex: 2
+  },
+  photo: {
+    flex: 2,
+    resizeMode: 'contain'
+  },
+  canvas: {
+    flex: 1
+  },
+  cameraBox: {
+    flex: 8
   }
 });

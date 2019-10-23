@@ -5,6 +5,8 @@ import HomeButton from '../components/HomeButton';
 import InstructionBar from '../components/InstructionBar';
 import CircleView from '../components/CircleView';
 import { startTospeak, stopToSpeak } from '../utils/utils.js';
+import { TUTORIAL_TITLE } from '../constants/titles.js';
+import { MAIN_SCREEN } from '../constants/screens.js';
 import {
   intro,
   pressLeft,
@@ -57,7 +59,7 @@ export default class TutorialScreen extends Component {
     stopToSpeak();
     if (navigate === 'right') {
       startTospeak('귀로를 시작합니다.');
-      navigation.navigate('MainScreen');
+      navigation.navigate(MAIN_SCREEN);
     } else if (navigate === 'left') {
       this.setState({
         isRightCheck: false,
@@ -76,13 +78,17 @@ export default class TutorialScreen extends Component {
           isTutorialComplete: true
         });
       });
-      startTospeak('다음는 튜토리얼을 진행하지 않겠습니다. 메인화면으로 넘어가시려면 오른쪽버튼을 눌러주세요. 다시 튜토리얼을 들으시려면 왼쪽버튼을 눌러주세요 ');
+      startTospeak(
+        '다음는 튜토리얼을 진행하지 않겠습니다. 메인화면으로 넘어가시려면 오른쪽버튼을 눌러주세요. 다시 튜토리얼을 들으시려면 왼쪽버튼을 눌러주세요 '
+      );
     } else if (button === 'left') {
       AsyncStorage.setItem('tutorialComplete', 'notCompleted', () => {
         this.setState({
           isTutorialComplete: true
         });
-        startTospeak('다음에도 튜토리얼을 진행하겠습니다. 메인화면으로 넘어가시려면 오른쪽버튼을 눌러주세요. 다시 튜토리얼을 들으시려면 왼쪽버튼을 눌러주세요');
+        startTospeak(
+          '다음에도 튜토리얼을 진행하겠습니다. 메인화면으로 넘어가시려면 오른쪽버튼을 눌러주세요. 다시 튜토리얼을 들으시려면 왼쪽버튼을 눌러주세요'
+        );
       });
     }
   };
@@ -97,8 +103,12 @@ export default class TutorialScreen extends Component {
   };
 
   render() {
-    const { isRightCheck, isLeftCheck, isCenterCheck, isTutorialComplete } = this.state;
-    console.log(isRightCheck, isLeftCheck, isCenterCheck);
+    const {
+      isRightCheck,
+      isLeftCheck,
+      isCenterCheck,
+      isTutorialComplete
+    } = this.state;
 
     if (isRightCheck && isLeftCheck && isCenterCheck) {
       return (
@@ -106,9 +116,15 @@ export default class TutorialScreen extends Component {
           <View style={styles.container}>
             <View style={styles.content}>
               <CircleView type="tutorialComplete" />
-              <InstructionBar content="튜토리얼 완료" />
+              <InstructionBar content={TUTORIAL_TITLE} />
             </View>
-            <MainButtons onPressBtn={isTutorialComplete? this.navigateBtn : this.tutorialCompleteCheckBtn} />
+            <MainButtons
+              onPressBtn={
+                isTutorialComplete
+                  ? this.navigateBtn
+                  : this.tutorialCompleteCheckBtn
+              }
+            />
           </View>
         </>
       );
@@ -118,7 +134,7 @@ export default class TutorialScreen extends Component {
           <View style={styles.container}>
             <View style={styles.content}>
               <CircleView type="tutorial" />
-              <InstructionBar content="튜토리얼 진행중" />
+              <InstructionBar content={TUTORIAL_TITLE} />
             </View>
             {isRightCheck && isLeftCheck ? (
               <HomeButton onPressBtn={this.checkBtn} />
