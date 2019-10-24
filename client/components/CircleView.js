@@ -6,6 +6,13 @@ export default function CircleView(props) {
 }
 
 const styles = StyleSheet.create({
+  main: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F9A914',
+    borderRadius: 200,
+    flex: 8
+  },
   tutorial: {
     justifyContent: 'center',
     alignItems: 'center',
@@ -20,12 +27,11 @@ const styles = StyleSheet.create({
     borderRadius: 200,
     flex: 8
   },
-  main: {
+  error: {
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#9C3414',
     borderRadius: 200,
     flex: 8
-  },
-
+  }
 });

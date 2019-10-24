@@ -4,7 +4,7 @@ import { View, Text, StyleSheet } from 'react-native';
 export default function InstructionBar(props) {
   return (
     <View style={styles.container}>
-        <Text style={styles.content}>{props.content}</Text>
+      <Text style={styles.content}>{props.content}</Text>
     </View>
   );
 }

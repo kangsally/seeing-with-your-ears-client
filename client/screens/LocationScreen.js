@@ -11,13 +11,13 @@ import {
   getCurrentAddress,
   locationCategory
 } from '../api/index.js';
-import { startTospeak, stopToSpeak } from '../utils/utils.js';
-import { MY_LOCATION_TITLE } from '../constants/titles.js';
-import { MAIN_SCREEN } from '../constants/screens.js';
+import { startTospeak, stopToSpeak } from '../utils';
+import { MY_LOCATION_TITLE } from '../constants/titles';
+import { MAIN_SCREEN } from '../constants/screens';
 import {
   makePlaceInfoScript,
   makeLocationScreenScript
-} from '../assets/audioScripts/audioScripts.js';
+} from '../assets/audioScripts';
 
 export default class LocationScreen extends Component {
   state = {
@@ -29,16 +29,24 @@ export default class LocationScreen extends Component {
     placeList: null
   };
 
-  async componentDidMount() {
+  componentDidMount = async () => {
     const { status } = await Permissions.askAsync(Permissions.LOCATION);
+    this.setState({
+      hasLocationPermission: status
+    });
     const { coords } = await Location.getCurrentPositionAsync();
     const { longitude, latitude } = coords;
-    const currentAddressData = await getCurrentAddress(longitude, latitude);
+    const { navigation } = this.props;
+    const currentAddressData = await getCurrentAddress(
+      longitude,
+      latitude,
+      navigation
+    );
     const currentAddress = currentAddressData.documents[0].address.address_name;
 
     const places = await Promise.all(
       locationCategory.map(async category =>
-        getLocationInfo(longitude, latitude, category)
+        getLocationInfo(longitude, latitude, category, navigation)
       )
     );
 
@@ -49,7 +57,6 @@ export default class LocationScreen extends Component {
     );
 
     this.setState({
-      hasLocationPermission: status === 'granted',
       currentLongitude: longitude,
       currentLatitude: latitude,
       currentAddress: currentAddress,
@@ -63,7 +70,11 @@ export default class LocationScreen extends Component {
         this.state.placeInfoScript
       )
     );
-  }
+  };
+
+  componentWillUnmount = async () => {
+    stopToSpeak();
+  };
 
   navigateBtn = navigate => {
     const { navigation } = this.props;
@@ -87,7 +98,11 @@ export default class LocationScreen extends Component {
       currentLongitude,
       currentLatitude
     } = this.state;
-    if (!hasLocationPermission || !currentLongitude || !currentLatitude) {
+    if (
+      hasLocationPermission === null ||
+      !currentLongitude ||
+      !currentLatitude
+    ) {
       return <Loading />;
     } else {
       return (

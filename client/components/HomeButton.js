@@ -1,7 +1,6 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-
 
 export default function HomeButton(props) {
   return (
@@ -11,10 +10,9 @@ export default function HomeButton(props) {
         onPress={() => {
           props.onPressBtn('center');
         }}
-        accessibilityLabel='center'
+        accessibilityLabel="center"
       >
-        
-    <MaterialCommunityIcons name='camera-iris' size={70}  />
+        <MaterialCommunityIcons name={props.icon} size={70} />
       </TouchableOpacity>
     </View>
   );

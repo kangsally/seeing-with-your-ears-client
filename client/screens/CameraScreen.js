@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, StyleSheet, ImageBackground, Modal } from 'react-native';
+import { View, StyleSheet, ImageBackground, Modal } from 'react-native';
 import * as Permissions from 'expo-permissions';
 import { Camera } from 'expo-camera';
 import { GLView } from 'expo-gl';
@@ -8,14 +8,15 @@ import HomeButton from '../components/HomeButton';
 import MainButtons from '../components/MainButtons';
 import Loading from '../components/Loading';
 import InstructionBar from '../components/InstructionBar';
-import { translateWord, getReconizedByAIData } from '../api/index.js';
-import { startTospeak, stopToSpeak } from '../utils/utils.js';
-import { MY_VIEW_TITLE } from '../constants/titles.js';
-import { MAIN_SCREEN } from '../constants/screens.js';
+import { translateWord, getReconizedByAIData } from '../api';
+import { startTospeak, stopToSpeak } from '../utils';
+import { MY_VIEW_TITLE } from '../constants/titles';
+import { MAIN_SCREEN } from '../constants/screens';
 import {
   makeObjDescrition,
-  cameraScreenStartScript
-} from '../assets/audioScripts/audioScripts';
+  cameraScreenStartScript,
+  noObjectScript
+} from '../assets/audioScripts';
 import { countBy, identity } from 'lodash';
 
 export default class CamearScreen extends Component {
@@ -34,18 +35,12 @@ export default class CamearScreen extends Component {
 
   componentDidMount = async () => {
     const { status } = await Permissions.askAsync(Permissions.CAMERA);
-    this.setState({ hasCameraPermission: status === 'granted' });
+    this.setState({ hasCameraPermission: status });
     startTospeak(cameraScreenStartScript);
   };
 
   componentWillUnmount = () => {
-    this.setState({
-      isCaptured: false,
-      photo: null,
-      objectData: [],
-      script: null,
-      onLoad: false
-    });
+    stopToSpeak();
   };
 
   onLoad = () => {
@@ -55,27 +50,41 @@ export default class CamearScreen extends Component {
   };
 
   takePicture = async () => {
+    const { navigation } = this.props;
+    let nearObj = [];
+    let farObj = [];
+    let script = '';
+    let objectData = null;
+
     stopToSpeak();
+
     if (this.camera) {
       const photo = await this.camera.takePictureAsync({
         quality: 0.5
       });
-      const data = await getReconizedByAIData(photo.uri);
+      const data = await getReconizedByAIData(photo.uri, navigation);
 
-      let nearObj = [];
-      let farObj = [];
-      let objectData = data.return_object.data;
+      objectData = data.return_object.data;
 
-      await Promise.all(
-        objectData.map(async obj => {
-          await translateWord(obj, nearObj, farObj, photo.height / 2);
-        })
-      );
-
-      const script = makeObjDescrition(
-        countBy(nearObj, identity),
-        countBy(farObj, identity)
-      );
+      if (objectData) {
+        await Promise.all(
+          objectData.map(async obj => {
+            await translateWord(
+              obj,
+              nearObj,
+              farObj,
+              (photo.height / 3) * 2,
+              navigation
+            );
+          })
+        );
+        script = makeObjDescrition(
+          countBy(nearObj, identity),
+          countBy(farObj, identity)
+        );
+      } else {
+        script = noObjectScript;
+      }
 
       this.setState({
         isCaptured: true,
@@ -89,20 +98,22 @@ export default class CamearScreen extends Component {
   };
 
   onGLContextCreate = async gl => {
-    let ctx = new Expo2DContext(gl);
-    await ctx.initializeText();
+    if (this.state.objectData) {
+      let ctx = new Expo2DContext(gl);
+      await ctx.initializeText();
 
-    const ratioX = Math.abs(ctx.width / this.state.photo.width);
-    const ratioY = Math.abs(ctx.height / this.state.photo.height);
+      const ratioX = Math.abs(ctx.width / this.state.photo.width);
+      const ratioY = Math.abs(ctx.height / this.state.photo.height);
 
-    ctx.fillStyle = 'white';
-    ctx.font = '60pt sans-serif';
+      ctx.fillStyle = 'white';
+      ctx.font = '60pt sans-serif';
 
-    this.state.objectData.forEach(obj => {
-      ctx.fillText(obj.class, obj.x * ratioX, obj.y * ratioY);
-    });
+      this.state.objectData.forEach(obj => {
+        ctx.fillText(obj.class, obj.x * ratioX, obj.y * ratioY);
+      });
 
-    ctx.flush();
+      ctx.flush();
+    }
   };
 
   navigateBtn = navigate => {
@@ -125,8 +136,6 @@ export default class CamearScreen extends Component {
     const { hasCameraPermission, onLoad } = this.state;
     if (hasCameraPermission === null) {
       return <Loading />;
-    } else if (hasCameraPermission === false) {
-      return <Text>No access to camera</Text>;
     } else if (this.state.isCaptured) {
       return (
         <View style={styles.container}>
@@ -176,6 +185,7 @@ export default class CamearScreen extends Component {
             this.onLoad();
             this.takePicture();
           }}
+          icon={'camera-iris'}
         />
       </View>
     );

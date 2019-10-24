@@ -1,22 +1,20 @@
 import React, { Component } from 'react';
-import { View, Text, StyleSheet, AsyncStorage } from 'react-native';
+import { View, StyleSheet, AsyncStorage } from 'react-native';
 import MainButtons from '../components/MainButtons';
 import HomeButton from '../components/HomeButton';
 import InstructionBar from '../components/InstructionBar';
 import CircleView from '../components/CircleView';
-import { startTospeak, stopToSpeak } from '../utils/utils.js';
-import { TUTORIAL_TITLE } from '../constants/titles.js';
-import { MAIN_SCREEN } from '../constants/screens.js';
+import { startTospeak, stopToSpeak } from '../utils';
+import { TUTORIAL_TITLE } from '../constants/titles';
+import { MAIN_SCREEN } from '../constants/screens';
 import {
-  intro,
-  pressLeft,
-  pressRight,
-  pressCenter,
-  error,
-  end,
-  excellent,
-  blank
-} from '../assets/audioScripts/audioScripts';
+  tutorialScreenStartScript,
+  tutorialEndScripit,
+  makeErrorMessage,
+  makeSuccessMessage,
+  makeTutorialCheckMessage,
+  introScript
+} from '../assets/audioScripts';
 
 export default class TutorialScreen extends Component {
   constructor(props) {
@@ -28,46 +26,41 @@ export default class TutorialScreen extends Component {
     };
   }
 
-  componentDidMount = () => {
-    startTospeak(intro + blank + pressLeft);
+  componentDidMount = async () => {
+    startTospeak(tutorialScreenStartScript);
+  };
+
+  componentWillUnmount = async () => {
+    stopToSpeak();
   };
 
   checkBtn = button => {
     stopToSpeak();
     if (button === 'right') {
       if (!this.state.isLeftCheck && !this.state.isRightCheck) {
-        startTospeak(error + blank + pressLeft);
+        startTospeak(makeErrorMessage(button));
       } else {
         this.setState({ isRightCheck: true });
-        startTospeak(excellent + blank + pressCenter);
+        startTospeak(makeSuccessMessage(button));
       }
     } else if (button === 'left') {
       if (this.state.isLeftCheck && !this.state.isRightCheck) {
-        startTospeak(error + blank + pressRight);
+        startTospeak(makeErrorMessage(button));
       } else {
         this.setState({ isLeftCheck: true });
-        startTospeak(excellent + blank + pressRight);
+        startTospeak(makeSuccessMessage(button));
       }
     } else if (button === 'center') {
       this.setState({ isCenterCheck: true });
-      startTospeak(excellent + blank + end);
+      startTospeak(tutorialEndScripit);
     }
   };
 
-  navigateBtn = navigate => {
+  navigateBtn = () => {
     const { navigation } = this.props;
     stopToSpeak();
-    if (navigate === 'right') {
-      startTospeak('귀로를 시작합니다.');
-      navigation.navigate(MAIN_SCREEN);
-    } else if (navigate === 'left') {
-      this.setState({
-        isRightCheck: false,
-        isLeftCheck: false,
-        isCenterCheck: false
-      });
-      startTospeak(intro + blank + pressLeft);
-    }
+    startTospeak(introScript);
+    navigation.navigate(MAIN_SCREEN);
   };
 
   tutorialCompleteCheckBtn = button => {
@@ -78,17 +71,13 @@ export default class TutorialScreen extends Component {
           isTutorialComplete: true
         });
       });
-      startTospeak(
-        '다음는 튜토리얼을 진행하지 않겠습니다. 메인화면으로 넘어가시려면 오른쪽버튼을 눌러주세요. 다시 튜토리얼을 들으시려면 왼쪽버튼을 눌러주세요 '
-      );
+      startTospeak(makeTutorialCheckMessage(button));
     } else if (button === 'left') {
       AsyncStorage.setItem('tutorialComplete', 'notCompleted', () => {
         this.setState({
           isTutorialComplete: true
         });
-        startTospeak(
-          '다음에도 튜토리얼을 진행하겠습니다. 메인화면으로 넘어가시려면 오른쪽버튼을 눌러주세요. 다시 튜토리얼을 들으시려면 왼쪽버튼을 눌러주세요'
-        );
+        startTospeak(makeTutorialCheckMessage(button));
       });
     }
   };
@@ -118,13 +107,11 @@ export default class TutorialScreen extends Component {
               <CircleView type="tutorialComplete" />
               <InstructionBar content={TUTORIAL_TITLE} />
             </View>
-            <MainButtons
-              onPressBtn={
-                isTutorialComplete
-                  ? this.navigateBtn
-                  : this.tutorialCompleteCheckBtn
-              }
-            />
+            {isTutorialComplete ? (
+              <HomeButton onPressBtn={this.navigateBtn} icon={'home-circle'} />
+            ) : (
+              <MainButtons onPressBtn={this.tutorialCompleteCheckBtn} />
+            )}
           </View>
         </>
       );
@@ -137,7 +124,7 @@ export default class TutorialScreen extends Component {
               <InstructionBar content={TUTORIAL_TITLE} />
             </View>
             {isRightCheck && isLeftCheck ? (
-              <HomeButton onPressBtn={this.checkBtn} />
+              <HomeButton onPressBtn={this.checkBtn} icon={'camera-iris'} />
             ) : (
               <MainButtons onPressBtn={this.checkBtn} />
             )}

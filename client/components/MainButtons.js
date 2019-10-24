@@ -1,9 +1,8 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { Entypo } from '@expo/vector-icons';
 
 export default function MainButtons(props) {
-
   return (
     <View style={styles.container}>
       <TouchableOpacity
@@ -13,16 +12,16 @@ export default function MainButtons(props) {
         }}
         accessibilityLabel="left"
       >
-      <Entypo name='triangle-left' size={40} color="black" />
+        <Entypo name="triangle-left" size={40} color="black" />
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.right}
         onPress={() => {
           props.onPressBtn('right');
         }}
-        accessibilityLabel='right'
+        accessibilityLabel="right"
       >
-        <Entypo name='triangle-right' size={40} color="black" />
+        <Entypo name="triangle-right" size={40} color="black" />
       </TouchableOpacity>
     </View>
   );
@@ -42,7 +41,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: '#EAEDEC',
     borderLeftWidth: 0.5,
-    borderLeftColor: '#868e96',
+    borderLeftColor: '#868e96'
   },
   left: {
     flex: 1,
@@ -51,7 +50,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: '#EAEDEC',
     borderRightWidth: 0.5,
-    borderRightColor: '#868e96',
+    borderRightColor: '#868e96'
   },
   text: {
     color: 'white',

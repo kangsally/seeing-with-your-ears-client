@@ -1,12 +1,11 @@
 import React, { Component } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Image } from 'react-native';
 import MainButtons from '../components/MainButtons';
 import InstructionBar from '../components/InstructionBar';
-import CircleView from '../components/CircleView';
-import { startTospeak, stopToSpeak } from '../utils/utils.js';
-import {MAIN_TITLE} from '../constants/titles.js';
-import {CAMERA_SCREEN, LOCATION_SCREEN} from '../constants/screens.js';
-import { mainScreenStartScript } from '../assets/audioScripts/audioScripts.js';
+import { startTospeak, stopToSpeak } from '../utils';
+import { MAIN_TITLE } from '../constants/titles';
+import { CAMERA_SCREEN, LOCATION_SCREEN } from '../constants/screens';
+import { mainScreenStartScript } from '../assets/audioScripts';
 
 export default class MainScreen extends Component {
   componentDidMount = () => {
@@ -27,7 +26,12 @@ export default class MainScreen extends Component {
     return (
       <View style={styles.container}>
         <View style={styles.content}>
-          <CircleView type='main' />
+          <View style={styles.imageBox}>
+            <Image
+              style={styles.image}
+              source={require('../assets/logo-1.png')}
+            />
+          </View>
           <InstructionBar content={MAIN_TITLE} />
         </View>
         <MainButtons onPressBtn={this.navigateBtn} />
@@ -42,11 +46,17 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 2,
-    backgroundColor: '#CCCCCC'
+    backgroundColor: '#fff'
   },
-  text: {
-    color: 'white',
-    fontSize: 30,
-    fontWeight: 'bold'
+  image: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '50%',
+    height: '60%'
+  },
+  imageBox: {
+    flex: 8,
+    justifyContent: 'center',
+    alignItems: 'center'
   }
 });

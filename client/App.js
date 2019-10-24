@@ -1,28 +1,60 @@
 import React, { Component } from 'react';
-import { SafeAreaView, Platform, AsyncStorage, View, StyleSheet } from 'react-native';
+import {
+  SafeAreaView,
+  Platform,
+  AsyncStorage,
+  View,
+  StyleSheet
+} from 'react-native';
 import { createSwitchNavigator, createAppContainer } from 'react-navigation';
 import { AppLoading } from 'expo';
 import { Asset } from 'expo-asset';
+import * as Permissions from 'expo-permissions';
 import TutorialScreen from './screens/TutorialScreen';
 import LocationScreen from './screens/LocationScreen';
 import MainScreen from './screens/MainScreen';
 import CameraScreen from './screens/CameraScreen';
+import PermissionError from './components/PermissionError';
+import { startTospeak, stopToSpeak } from './utils';
+import { permissionAskScript } from './assets/audioScripts';
 let AppContainer;
 
 export default class App extends Component {
   state = {
-    isReady: false
+    isReady: false,
+    hasCameraPermission: null,
+    hasLocationPermission: null
   };
 
-  async _loadAssetsAsync() {
-    await Asset.fromModule(require('./assets/logo.png')).downloadAsync();
-  }
+  loadAssetsAsync = async () => {
+    // startTospeak(permissionAskScript);
+    await Asset.fromModule(require('./assets/logo-1.png')).downloadAsync();
+    const cameraPermission = await Permissions.askAsync(Permissions.CAMERA);
+    const locationPermission = await Permissions.askAsync(Permissions.LOCATION);
+    // if (
+    //   cameraPermission.status === 'granted' &&
+    //   locationPermission.status === 'granted'
+    // ) {
+    //   stopToSpeak();
+    // }
+    this.setState({
+      hasCameraPermission: cameraPermission.status,
+      hasLocationPermission: locationPermission.status
+    });
+  };
 
   render() {
-    if (!this.state.isReady) {
+    const { isReady, hasCameraPermission, hasLocationPermission } = this.state;
+    if (
+      hasCameraPermission === 'denied' ||
+      hasLocationPermission === 'denied'
+    ) {
+      return <PermissionError />;
+    }
+    if (!isReady) {
       return (
         <AppLoading
-          startAsync={this._loadAssetsAsync}
+          startAsync={this.loadAssetsAsync}
           onFinish={() => this.setState({ isReady: true })}
           onError={console.warn}
         />
@@ -37,7 +69,7 @@ export default class App extends Component {
       }
       return (
         <>
-          <View style={styles.android}/>
+          <View style={styles.android} />
           <AppContainer />
         </>
       );
@@ -65,11 +97,11 @@ AsyncStorage.getItem('tutorialComplete').then(tutorialCheck => {
 });
 
 const styles = StyleSheet.create({
-  ios: { 
-    flex: 1, 
-    backgroundColor: '#fff' 
+  ios: {
+    flex: 1,
+    backgroundColor: '#fff'
   },
   android: {
-    height: 24 
+    height: 24
   }
 });
