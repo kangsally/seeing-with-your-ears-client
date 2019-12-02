@@ -12,7 +12,7 @@
 
   <img src="./screenshot/intro.jpg" width="200px" /> <img src="./screenshot/tutorial1.jpg" width="200px" /> <img src="./screenshot/tutorial2.jpg" width="200px" />
 
-  <img src="./screenshot/main.jpg" width="200px" /><img src="./screenshot/view.jpg" width="200px" /><img src="./screenshot/location.jpg" width="200px" />
+  <img src="./screenshot/main.jpg" width="200px" /> <img src="./screenshot/view.jpg" width="200px" /> <img src="./screenshot/location.jpg" width="200px" />
 
 
 
