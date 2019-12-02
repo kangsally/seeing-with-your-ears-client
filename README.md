@@ -6,15 +6,13 @@
 
 ## Preview
 
-- 동영상 주소: https://youtu.be/vNFotiRQKxU (배포전이므로 음성을 확인을 위해 동영상 시청을 권장합니다.)
+- 동영상 주소: https://youtu.be/vNFotiRQKxU (음성 확인을 원하신다면 동영상 시청을 권장합니다.)
 
 - Screen shot
 
   <img src="./screenshot/intro.jpg" width="200px" /> <img src="./screenshot/tutorial1.jpg" width="200px" /> <img src="./screenshot/tutorial2.jpg" width="200px" />
 
-
-
-​  <img src="./screenshot/main.jpg" width="200px" /><img src="./screenshot/view.jpg" width="200px" /><img src="./screenshot/location.jpg" width="200px" />
+  <img src="./screenshot/main.jpg" width="200px" /><img src="./screenshot/view.jpg" width="200px" /><img src="./screenshot/location.jpg" width="200px" />
 
 
 
@@ -55,7 +53,7 @@ npm install -g expo-cli
 - ` environment.js` 파일을 생성하여 아래 코드를 복사하여 붙여넣은 후 <kakao-api-key> 와 <object-detection-access-key>에 위에서 발급받은 api key를 각각 입력합니다.
 
 ```javascript
-import  Constants  from "expo-constants";
+import  Constants  from 'expo-constants';
 
 const ENV = {
  dev: {
