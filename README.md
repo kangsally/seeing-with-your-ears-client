@@ -24,7 +24,7 @@
 
 
 
-## **Features**
+## Features
 
 - 버튼 위치 음성 안내 및 실습 튜토리얼
 
@@ -86,7 +86,7 @@ export default getEnvVars;
 
 
 
-## **Installation**
+## Installation
 
 ```
 git clone https://github.com/kangsally/seeing-with-your-ears
@@ -99,7 +99,7 @@ npm start
 
 
 
-## **Skills**
+## Skills
 
 - ES2015+
 
@@ -113,17 +113,17 @@ npm start
 
 - Expo-2d-context
 
-- Obeject Detection API
+- Object Detection API
 
 
 
-## **Test**
+## Test
 
 -  Jest와 Enzyme을 이용한 Component 단위 테스트 구현
 
 
 
-## **Other tools**
+## Other tools
 
 - Git을 이용한 project 관리
 
@@ -133,21 +133,22 @@ npm start
 
 
 
-## **Challenges**
+## Challenges
 
-- Mobile 어플리케이션, 카메라 및 스피커 사용, 사진 데이터 외부 api 전송 등 처음 접근해보는 것들이 믾아서 익숙해지는 데 시간이 걸렸지만, 배운 것이 많았던 프로젝트였습니다.
+- Mobile 어플리케이션, 카메라 및 스피커 사용, 사진 데이터 외부 api 전송 등 처음 시도해보는 것이 많은 만큼 배운 것도 많았던 프로젝트였습니다.
 
 - 주요 사용자가 시각장애인이기 때문에 에러가 발생한 경우에도 음성안내가 되면서 간단한 인터페이스로 복구될 수 있도록 에러페이지를 작성했습니다.
 
-- 외부 api의 객체 인식 데이터를 기반으로 사진을 사용자에게 묘사하는 방법에 대해 많은 고민을 했고, 가까운 사물과 먼 사물을 객체 위치에 따라 표현했습니다.
+- 객체 인식 api 데이터를 기반으로 사진을 사용자에게 묘사하는 방법에 대해 많은 고민을 했고, 가까운 사물과 먼 사물을 객체 위치 따라 표현했습니다.
 
 
 
-## **Things to do**
+## Things to do
 
-- 버그 수정: 나의 시야 촬영화면에서 두번 이상 촬영시 canvas 상에 텍스트 깨짐 현상이 있습니다. Expo-2d-context에서 Component가 re-rendering이 되더라도 context가 clear되지 않는 것 같습니다. (해당 오류는 다른 사용자에게도 나타남을 확인했습니다.) 이 부분은 Expo를 eject하고 react-native의 다른 canvas 라이브러리로 해결하고자 합니다.
+- 버그 수정: 나의 시야 촬영화면에서 두번 이상 촬영시 canvas 상에 텍스트 깨짐 현상이 있습니다. Expo-2d-context에서 Component가 re-rendering이 되더라도 context가 clear되지 않는 것 같습니다.(해당 오류는 다른 사용자에게도 나타남을 확인했습니다.) 이 부분은 Expo를 eject하고 react-native의 다른 canvas 라이브러리로 해결하고자 합니다.
 
 - 나의 위치 안내 화면에서 Speach To Text 기능으로 사용자가 음성으로 원하는 편의시설만 안내 받을 수 있는 기능 추가
 
 - 유닛 테스트 추가
+
 - Google play store 배포 
