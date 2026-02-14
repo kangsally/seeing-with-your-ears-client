@@ -36,7 +36,7 @@
     "babel-preset-expo": "^7.0.0",
     "enzyme": "3.10.0",
     "enzyme-adapter-react-16": "1.15.1",
-    "jest-expo": "35.0.0",
+    "jest-expo": "54.0.17",
     "react-dom": "16.11.0",
     "react-test-renderer": "16.11.0"
   },
